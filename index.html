@@ -1,330 +1,356 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>越南盾換算機</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-dots: #e0e0e0;
-            --calc-bg: #ffffff;
-            --border-color: #000000;
-            --btn-red: #ff2e2e;
-            --btn-yellow: #fecd45;
-            --text-color: #000;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <title>越南盾換算機</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root{
+      --bg-start: #eafaf9;
+      --bg-end: #f1fbff;
+      --dot: rgba(6,78,84,0.03);
+      --accent-1: #06b6d4; /* 青綠 */
+      --accent-2: #0ea5a4; /* 青 */
+      --accent-deep: #0b7285; /* 深青 */
+      --glass: rgba(255,255,255,0.65);
+      --text: #053642;
+      --muted: #5b6b70;
+      --btn-shadow: rgba(3,38,42,0.12);
+      --radius: 14px;
+    }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f4f4;
-            /* 點點背景圖案 */
-            background-image: radial-gradient(var(--bg-dots) 2px, transparent 2px);
-            background-size: 20px 20px;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    *{box-sizing:border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent;}
+    html,body{height:100%; margin:0; font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--text);}
 
-        .calculator-frame {
-            background: var(--calc-bg);
-            border: 8px solid var(--border-color);
-            border-radius: 20px;
-            padding: 25px;
-            width: 320px;
-            max-width: 90%;
-            box-shadow: 10px 10px 0px rgba(0,0,0,0.1);
-            position: relative;
-        }
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(180deg,var(--bg-start),var(--bg-end));
+      background-image:
+        radial-gradient(var(--dot) 1px, transparent 1px),
+        linear-gradient(180deg,var(--bg-start),var(--bg-end));
+      background-size: 20px 20px, auto;
+      padding:32px;
+    }
 
-        /* 設定按鈕 */
-        .settings-btn {
-            position: absolute;
-            top: -50px;
-            right: 0;
-            background: #333;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-        }
+    .calculator-frame{
+      width: 360px;
+      max-width: 94%;
+      border-radius: calc(var(--radius) + 6px);
+      padding: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,255,255,0.85));
+      box-shadow: 0 10px 30px rgba(6,46,52,0.12), 0 2px 6px rgba(3,38,42,0.06);
+      position:relative;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(10,55,60,0.06);
+    }
 
-        /* 顯示螢幕區域 */
-        .screen-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
+    /* title area */
+    .header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .brand{
+      width:48px;
+      height:48px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(135deg,var(--accent-1),var(--accent-2));
+      color:white;
+      font-weight:700;
+      font-size:18px;
+      box-shadow: 0 6px 18px rgba(6,78,84,0.14);
+    }
+    .title{
+      font-size:18px;
+      font-weight:700;
+      color:var(--text);
+    }
+    .desc{
+      font-size:12px;
+      color:var(--muted);
+    }
 
-        .display-box {
-            border: 5px solid var(--border-color);
-            background: #fff;
-            padding: 10px 15px;
-            text-align: right;
-            font-size: 28px;
-            font-weight: bold;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            height: 50px;
-            overflow: hidden;
-            white-space: nowrap;
-        }
+    /* settings button (top-right) */
+    .settings-btn{
+      position:absolute;
+      top:14px;
+      right:14px;
+      background:transparent;
+      border:none;
+      padding:8px;
+      border-radius:10px;
+      cursor:pointer;
+      color:var(--accent-deep);
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-weight:600;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .settings-btn:hover{ transform: translateY(-2px); box-shadow: 0 6px 18px rgba(6,78,84,0.08); }
+    .settings-btn .icon{
+      width:36px;height:36px;border-radius:9px;
+      background: linear-gradient(135deg, rgba(6,182,212,0.12), rgba(14,165,164,0.12));
+      display:flex;align-items:center;justify-content:center;color:var(--accent-deep);
+      border:1px solid rgba(10,55,60,0.04);
+    }
 
-        .label {
-            margin-right: auto;
-            font-size: 20px;
-            color: #555;
-        }
+    /* displays */
+    .screen-container{ display:flex; flex-direction:column; gap:12px; margin-bottom:16px; }
+    .display-box{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background: var(--glass);
+      border-radius: 12px;
+      padding:10px 14px;
+      height:64px;
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.6);
+      border: 1px solid rgba(6,78,84,0.04);
+    }
+    .display-left{ display:flex; align-items:center; gap:10px; }
+    .label{
+      font-size:13px;
+      color:var(--muted);
+      background: linear-gradient(90deg, rgba(14,165,164,0.06), rgba(6,182,212,0.05));
+      padding:6px 10px;
+      border-radius:8px;
+      font-weight:600;
+      border:1px solid rgba(10,55,60,0.03);
+    }
+    .value{
+      font-size:22px;
+      font-weight:800;
+      color:var(--text);
+      letter-spacing:0.6px;
+    }
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+    }
 
-        /* 鍵盤區域 */
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            justify-items: center;
-        }
+    .suffix-hint{
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+      margin-bottom:6px;
+    }
 
-        .btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: none;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.1s;
-            user-select: none;
-        }
+    /* keypad */
+    .keypad{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    .btn{
+      width:100%;
+      aspect-ratio: 1/1;
+      border-radius:12px;
+      border:none;
+      font-size:20px;
+      font-weight:700;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: transform .08s ease, box-shadow .12s ease;
+      box-shadow: 0 6px 14px var(--btn-shadow);
+      user-select:none;
+    }
+    .btn:active{ transform: translateY(2px) scale(0.995); }
 
-        .btn:active {
-            transform: scale(0.95);
-        }
+    .btn-num{
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+      color: white;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.08);
+      font-size:20px;
+    }
+    .btn-ce{
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(245,249,250,0.92));
+      color:var(--accent-deep);
+      border:1px solid rgba(10,55,60,0.05);
+      font-size:16px;
+    }
+    .btn-back{
+      background: linear-gradient(135deg, #7dd3fc33, #0ea5a441);
+      color:var(--accent-deep);
+      font-size:16px;
+      border:1px solid rgba(10,55,60,0.04);
+    }
 
-        .btn-num {
-            background-color: var(--btn-red);
-            color: white;
-        }
+    /* responsive tweaks */
+    @media (max-width:420px){
+      .calculator-frame{ padding:16px; }
+      .display-box{ height:58px; }
+      .brand{ width:44px;height:44px;}
+      .value{ font-size:20px; }
+      .btn{ border-radius:10px; }
+    }
 
-        .btn-ce {
-            background-color: var(--btn-yellow);
-            color: black;
-            font-size: 22px;
-        }
-
-        .btn-back {
-            background-color: var(--btn-red);
-            color: white;
-            font-size: 24px;
-        }
-
-        /* 彈出視窗 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            width: 80%;
-            max-width: 300px;
-            text-align: center;
-            border: 4px solid black;
-        }
-
-        .modal-content input {
-            font-size: 18px;
-            padding: 10px;
-            width: 80%;
-            margin: 15px 0;
-            border: 2px solid #ccc;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        .save-btn {
-            background: var(--btn-red);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .suffix-hint {
-            font-size: 12px;
-            color: #888;
-            text-align: center;
-            margin-top: -10px;
-            margin-bottom: 20px;
-        }
-    </style>
+    /* modal */
+    .modal{ display:none; position:fixed; inset:0; background:rgba(3,12,14,0.36); align-items:center; justify-content:center; z-index:120; padding:20px; }
+    .modal-content{
+      width:100%; max-width:360px; background:linear-gradient(180deg,white,#f8ffff);
+      padding:18px; border-radius:12px; box-shadow: 0 20px 50px rgba(3,38,42,0.25);
+      border:1px solid rgba(6,78,84,0.06);
+      text-align:center;
+    }
+    .modal-content h3{ margin:0 0 6px; color:var(--accent-deep); }
+    .modal-content p{ margin:0 0 8px; color:var(--muted); font-size:13px; }
+    .modal-content input{
+      width:80%; padding:10px 12px; font-size:16px; border-radius:10px; border:1px solid rgba(6,78,84,0.06);
+      text-align:center; margin:8px 0 12px;
+    }
+    .save-btn{ padding:10px 18px; border-radius:10px; border:none; background: linear-gradient(90deg,var(--accent-2), var(--accent-deep)); color:white; font-weight:700; cursor:pointer; }
+  </style>
 </head>
 <body>
-
-    <div class="calculator-frame">
-        <button class="settings-btn" onclick="openSettings()">
-            <i class="fas fa-cog"></i> 設定匯率
-        </button>
-
-        <div class="screen-container">
-            <div class="display-box" id="twd-display">
-                <span class="label">NT$</span>
-                <span id="twd-value">0</span>
-            </div>
-            
-            <div class="display-box" id="vnd-display">
-                <span class="label">₫</span>
-                <span id="vnd-value">0</span>
-            </div>
-        </div>
-
-        <div class="suffix-hint">自動補上 ",000" (千)</div>
-
-        <div class="keypad">
-            <button class="btn btn-num" onclick="pressNum(7)">7</button>
-            <button class="btn btn-num" onclick="pressNum(8)">8</button>
-            <button class="btn btn-num" onclick="pressNum(9)">9</button>
-            
-            <button class="btn btn-num" onclick="pressNum(4)">4</button>
-            <button class="btn btn-num" onclick="pressNum(5)">5</button>
-            <button class="btn btn-num" onclick="pressNum(6)">6</button>
-            
-            <button class="btn btn-num" onclick="pressNum(1)">1</button>
-            <button class="btn btn-num" onclick="pressNum(2)">2</button>
-            <button class="btn btn-num" onclick="pressNum(3)">3</button>
-            
-            <button class="btn btn-num" onclick="pressNum(0)">0</button>
-            <button class="btn btn-ce" onclick="clearAll()">CE</button>
-            <button class="btn btn-back" onclick="backspace()"><i class="fas fa-backspace"></i></button>
-        </div>
+  <div class="calculator-frame">
+    <div class="header">
+      <div class="brand">₫ ↔</div>
+      <div>
+        <div class="title">越南盾換算機</div>
+        <div class="desc">輸入「千」為單位；例：輸入 134 → 134,000 ₫</div>
+      </div>
     </div>
 
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <h3>設定匯率</h3>
-            <p>1 台幣 = 多少越南盾?</p>
-            <p style="font-size: 12px; color: #666;">(例: 輸入 720 代表 1 TWD = 720 VND)</p>
-            <input type="number" id="rate-input" placeholder="720">
-            <button class="save-btn" onclick="saveSettings()">儲存</button>
+    <button class="settings-btn" onclick="openSettings()" aria-label="設定匯率">
+      <div class="icon"><i class="fas fa-cog"></i></div>
+      <div style="font-size:13px; color:var(--accent-deep); font-weight:700;">設定</div>
+    </button>
+
+    <div class="screen-container">
+      <div class="display-box" id="vnd-display">
+        <div class="display-left">
+          <div class="label">₫ 越南盾</div>
+          <div class="sub">自動補上 ",000"</div>
         </div>
+        <div class="value" id="vnd-value">0</div>
+      </div>
+
+      <div class="display-box" id="twd-display">
+        <div class="display-left">
+          <div class="label">NT$ 台幣</div>
+          <div class="sub">四捨五入到 0.1</div>
+        </div>
+        <div class="value" id="twd-value">0</div>
+      </div>
     </div>
 
-    <script>
-        // 狀態變數
-        let rawInput = ""; // 使用者實際按下的數字字串 (例如 "134")
-        let exchangeRate = 720; // 預設匯率 (根據您的計算範例調整)
+    <div class="keypad" role="group" aria-label="數字鍵盤">
+      <button class="btn btn-num" onclick="pressNum(7)">7</button>
+      <button class="btn btn-num" onclick="pressNum(8)">8</button>
+      <button class="btn btn-num" onclick="pressNum(9)">9</button>
 
-        // 初始化
-        window.onload = function() {
-            const savedRate = localStorage.getItem('vnd_rate');
-            if (savedRate) {
-                exchangeRate = parseFloat(savedRate);
-            }
-            updateDisplay();
-        };
+      <button class="btn btn-num" onclick="pressNum(4)">4</button>
+      <button class="btn btn-num" onclick="pressNum(5)">5</button>
+      <button class="btn btn-num" onclick="pressNum(6)">6</button>
 
-        // 按下數字鍵
-        function pressNum(num) {
-            if (rawInput.length > 8) return; // 限制長度避免爆版
-            if (rawInput === "0" && num === 0) return;
-            if (rawInput === "0" && num !== 0) {
-                rawInput = num.toString();
-            } else {
-                rawInput += num.toString();
-            }
-            updateDisplay();
-        }
+      <button class="btn btn-num" onclick="pressNum(1)">1</button>
+      <button class="btn btn-num" onclick="pressNum(2)">2</button>
+      <button class="btn btn-num" onclick="pressNum(3)">3</button>
 
-        // 清除 (CE)
-        function clearAll() {
-            rawInput = "";
-            updateDisplay();
-        }
+      <button class="btn btn-num" onclick="pressNum(0)">0</button>
+      <button class="btn btn-ce" onclick="clearAll()">CE</button>
+      <button class="btn btn-back" onclick="backspace()"><i class="fas fa-backspace"></i></button>
+    </div>
+  </div>
 
-        // 退格鍵
-        function backspace() {
-            if (rawInput.length > 0) {
-                rawInput = rawInput.slice(0, -1);
-                updateDisplay();
-            }
-        }
+  <div id="settings-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content">
+      <h3>設定匯率</h3>
+      <p>1 台幣 = 多少越南盾？</p>
+      <p style="font-size:12px; color:var(--muted)">(例：輸入 720 代表 1 TWD = 720 VND)</p>
+      <input type="number" id="rate-input" placeholder="720" inputmode="numeric" />
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="save-btn" onclick="saveSettings()">儲存</button>
+      </div>
+    </div>
+  </div>
 
-        // 更新畫面
-        function updateDisplay() {
-            const vndDisplay = document.getElementById('vnd-value');
-            const twdDisplay = document.getElementById('twd-value');
+  <script>
+    // 未改動核心邏輯，僅保留原本行為
+    let rawInput = "";
+    let exchangeRate = 720;
 
-            if (rawInput === "") {
-                vndDisplay.innerText = "0";
-                twdDisplay.innerText = "0";
-                return;
-            }
+    window.onload = function() {
+      const savedRate = localStorage.getItem('vnd_rate');
+      if (savedRate) { exchangeRate = parseFloat(savedRate); }
+      updateDisplay();
+    };
 
-            // 邏輯: 輸入的數字視為"千"單位
-            // 如果輸入 134，實際數值是 134000
-            const realVndValue = parseInt(rawInput) * 1000;
-            
-            // 格式化顯示 (加逗號)
-            vndDisplay.innerText = realVndValue.toLocaleString();
+    function pressNum(num) {
+      if (rawInput.length > 8) return;
+      if (rawInput === "0" && num === 0) return;
+      if (rawInput === "0" && num !== 0) { rawInput = num.toString(); }
+      else { rawInput += num.toString(); }
+      updateDisplay();
+    }
 
-            // 計算台幣: VND / 匯率
-            // 四捨五入到小數第一位
-            const twdValue = realVndValue / exchangeRate;
-            
-            // 如果是整數顯示整數，否則顯示一位小數
-            twdDisplay.innerText = parseFloat(twdValue.toFixed(1)).toLocaleString();
-        }
+    function clearAll() {
+      rawInput = "";
+      updateDisplay();
+    }
 
-        // 設定相關功能
-        function openSettings() {
-            document.getElementById('settings-modal').style.display = 'flex';
-            document.getElementById('rate-input').value = exchangeRate;
-        }
+    function backspace() {
+      if (rawInput.length > 0) {
+        rawInput = rawInput.slice(0, -1);
+        updateDisplay();
+      }
+    }
 
-        function saveSettings() {
-            const inputVal = document.getElementById('rate-input').value;
-            if (inputVal && inputVal > 0) {
-                exchangeRate = parseFloat(inputVal);
-                localStorage.setItem('vnd_rate', exchangeRate);
-                updateDisplay(); // 重新計算當前數值
-                document.getElementById('settings-modal').style.display = 'none';
-            } else {
-                alert("請輸入有效的匯率數字");
-            }
-        }
+    function updateDisplay() {
+      const vndDisplay = document.getElementById('vnd-value');
+      const twdDisplay = document.getElementById('twd-value');
 
-        // 點擊視窗外部關閉
-        window.onclick = function(event) {
-            const modal = document.getElementById('settings-modal');
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-    </script>
+      if (rawInput === "") {
+        vndDisplay.innerText = "0";
+        twdDisplay.innerText = "0";
+        return;
+      }
+
+      const realVndValue = parseInt(rawInput) * 1000;
+      vndDisplay.innerText = realVndValue.toLocaleString();
+
+      const twdValue = realVndValue / exchangeRate;
+      twdDisplay.innerText = parseFloat(twdValue.toFixed(1)).toLocaleString();
+    }
+
+    function openSettings() {
+      const modal = document.getElementById('settings-modal');
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden','false');
+      document.getElementById('rate-input').value = exchangeRate;
+    }
+
+    function saveSettings() {
+      const inputVal = document.getElementById('rate-input').value;
+      if (inputVal && inputVal > 0) {
+        exchangeRate = parseFloat(inputVal);
+        localStorage.setItem('vnd_rate', exchangeRate);
+        updateDisplay();
+        const modal = document.getElementById('settings-modal');
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden','true');
+      } else {
+        alert("請輸入有效的匯率數字");
+      }
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('settings-modal');
+      if (event.target == modal) {
+        modal.style.display = "none";
+        modal.setAttribute('aria-hidden','true');
+      }
+    }
+  </script>
 </body>
 </html>
