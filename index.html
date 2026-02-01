@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>越南盾換算機</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dots: #e0e0e0;
+            --calc-bg: #ffffff;
+            --border-color: #000000;
+            --btn-red: #ff2e2e;
+            --btn-yellow: #fecd45;
+            --text-color: #000;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f4;
+            /* 點點背景圖案 */
+            background-image: radial-gradient(var(--bg-dots) 2px, transparent 2px);
+            background-size: 20px 20px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .calculator-frame {
+            background: var(--calc-bg);
+            border: 8px solid var(--border-color);
+            border-radius: 20px;
+            padding: 25px;
+            width: 320px;
+            max-width: 90%;
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* 設定按鈕 */
+        .settings-btn {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* 顯示螢幕區域 */
+        .screen-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .display-box {
+            border: 5px solid var(--border-color);
+            background: #fff;
+            padding: 10px 15px;
+            text-align: right;
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            height: 50px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .label {
+            margin-right: auto;
+            font-size: 20px;
+            color: #555;
+        }
+
+        /* 鍵盤區域 */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            justify-items: center;
+        }
+
+        .btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.1s;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-num {
+            background-color: var(--btn-red);
+            color: white;
+        }
+
+        .btn-ce {
+            background-color: var(--btn-yellow);
+            color: black;
+            font-size: 22px;
+        }
+
+        .btn-back {
+            background-color: var(--btn-red);
+            color: white;
+            font-size: 24px;
+        }
+
+        /* 彈出視窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            border: 4px solid black;
+        }
+
+        .modal-content input {
+            font-size: 18px;
+            padding: 10px;
+            width: 80%;
+            margin: 15px 0;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .save-btn {
+            background: var(--btn-red);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .suffix-hint {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-frame">
+        <button class="settings-btn" onclick="openSettings()">
+            <i class="fas fa-cog"></i> 設定匯率
+        </button>
+
+        <div class="screen-container">
+            <div class="display-box" id="twd-display">
+                <span class="label">NT$</span>
+                <span id="twd-value">0</span>
+            </div>
+            
+            <div class="display-box" id="vnd-display">
+                <span class="label">₫</span>
+                <span id="vnd-value">0</span>
+            </div>
+        </div>
+
+        <div class="suffix-hint">自動補上 ",000" (千)</div>
+
+        <div class="keypad">
+            <button class="btn btn-num" onclick="pressNum(7)">7</button>
+            <button class="btn btn-num" onclick="pressNum(8)">8</button>
+            <button class="btn btn-num" onclick="pressNum(9)">9</button>
+            
+            <button class="btn btn-num" onclick="pressNum(4)">4</button>
+            <button class="btn btn-num" onclick="pressNum(5)">5</button>
+            <button class="btn btn-num" onclick="pressNum(6)">6</button>
+            
+            <button class="btn btn-num" onclick="pressNum(1)">1</button>
+            <button class="btn btn-num" onclick="pressNum(2)">2</button>
+            <button class="btn btn-num" onclick="pressNum(3)">3</button>
+            
+            <button class="btn btn-num" onclick="pressNum(0)">0</button>
+            <button class="btn btn-ce" onclick="clearAll()">CE</button>
+            <button class="btn btn-back" onclick="backspace()"><i class="fas fa-backspace"></i></button>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <h3>設定匯率</h3>
+            <p>1 台幣 = 多少越南盾?</p>
+            <p style="font-size: 12px; color: #666;">(例: 輸入 720 代表 1 TWD = 720 VND)</p>
+            <input type="number" id="rate-input" placeholder="720">
+            <button class="save-btn" onclick="saveSettings()">儲存</button>
+        </div>
+    </div>
+
+    <script>
+        // 狀態變數
+        let rawInput = ""; // 使用者實際按下的數字字串 (例如 "134")
+        let exchangeRate = 720; // 預設匯率 (根據您的計算範例調整)
+
+        // 初始化
+        window.onload = function() {
+            const savedRate = localStorage.getItem('vnd_rate');
+            if (savedRate) {
+                exchangeRate = parseFloat(savedRate);
+            }
+            updateDisplay();
+        };
+
+        // 按下數字鍵
+        function pressNum(num) {
+            if (rawInput.length > 8) return; // 限制長度避免爆版
+            if (rawInput === "0" && num === 0) return;
+            if (rawInput === "0" && num !== 0) {
+                rawInput = num.toString();
+            } else {
+                rawInput += num.toString();
+            }
+            updateDisplay();
+        }
+
+        // 清除 (CE)
+        function clearAll() {
+            rawInput = "";
+            updateDisplay();
+        }
+
+        // 退格鍵
+        function backspace() {
+            if (rawInput.length > 0) {
+                rawInput = rawInput.slice(0, -1);
+                updateDisplay();
+            }
+        }
+
+        // 更新畫面
+        function updateDisplay() {
+            const vndDisplay = document.getElementById('vnd-value');
+            const twdDisplay = document.getElementById('twd-value');
+
+            if (rawInput === "") {
+                vndDisplay.innerText = "0";
+                twdDisplay.innerText = "0";
+                return;
+            }
+
+            // 邏輯: 輸入的數字視為"千"單位
+            // 如果輸入 134，實際數值是 134000
+            const realVndValue = parseInt(rawInput) * 1000;
+            
+            // 格式化顯示 (加逗號)
+            vndDisplay.innerText = realVndValue.toLocaleString();
+
+            // 計算台幣: VND / 匯率
+            // 四捨五入到小數第一位
+            const twdValue = realVndValue / exchangeRate;
+            
+            // 如果是整數顯示整數，否則顯示一位小數
+            twdDisplay.innerText = parseFloat(twdValue.toFixed(1)).toLocaleString();
+        }
+
+        // 設定相關功能
+        function openSettings() {
+            document.getElementById('settings-modal').style.display = 'flex';
+            document.getElementById('rate-input').value = exchangeRate;
+        }
+
+        function saveSettings() {
+            const inputVal = document.getElementById('rate-input').value;
+            if (inputVal && inputVal > 0) {
+                exchangeRate = parseFloat(inputVal);
+                localStorage.setItem('vnd_rate', exchangeRate);
+                updateDisplay(); // 重新計算當前數值
+                document.getElementById('settings-modal').style.display = 'none';
+            } else {
+                alert("請輸入有效的匯率數字");
+            }
+        }
+
+        // 點擊視窗外部關閉
+        window.onclick = function(event) {
+            const modal = document.getElementById('settings-modal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
