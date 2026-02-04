@@ -18,6 +18,8 @@
       --muted: #5b6b70;
       --btn-shadow: rgba(3,38,42,0.12);
       --radius: 14px;
+      --orange: #f97316;
+      --orange-deep: #ea580c;
     }
 
     *{box-sizing:border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent;}
@@ -66,6 +68,29 @@
       font-weight:700;
       font-size:18px;
       box-shadow: 0 6px 18px rgba(6,78,84,0.14);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      user-select: none;
+    }
+    .brand:hover{
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(6,78,84,0.2);
+    }
+    .brand:active{
+      transform: translateY(1px) scale(0.98);
+    }
+    .brand.calc-mode{
+      background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+      box-shadow: 0 6px 18px rgba(249,115,22,0.25);
+    }
+    .brand.calc-mode:hover{
+      box-shadow: 0 8px 24px rgba(249,115,22,0.35);
+    }
+    .brand-icon{
+      transition: transform 0.3s ease;
+    }
+    .brand:hover .brand-icon{
+      transform: rotate(15deg);
     }
     .title{
       font-size:18px;
@@ -149,6 +174,17 @@
       grid-template-columns: repeat(3, 1fr);
       gap:12px;
     }
+    .keypad.calc-mode{
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .keypad.calc-mode .btn{
+      aspect-ratio: 1/1;
+    }
+    .keypad.calc-mode .btn-wide{
+      aspect-ratio: auto;
+      grid-column: span 2;
+    }
     .btn{
       width:100%;
       aspect-ratio: 1/1;
@@ -184,6 +220,64 @@
       font-size:16px;
       border:1px solid rgba(10,55,60,0.04);
     }
+    
+    /* 計算機模式的運算符按鈕 */
+    .btn-op{
+      background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+      color: white;
+      font-size:22px;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.1);
+      box-shadow: 0 6px 14px rgba(249,115,22,0.2);
+    }
+    .btn-op:hover{
+      box-shadow: 0 8px 18px rgba(249,115,22,0.3);
+    }
+    
+    .btn-eq{
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      font-size:22px;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.1);
+      box-shadow: 0 6px 14px rgba(34,197,94,0.2);
+    }
+    .btn-eq:hover{
+      box-shadow: 0 8px 18px rgba(34,197,94,0.3);
+    }
+
+    /* 計算機模式的顯示框 */
+    .calc-display{
+      background: var(--glass);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.6);
+      border: 1px solid rgba(6,78,84,0.04);
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-end;
+    }
+    .calc-expression{
+      font-size: 14px;
+      color: var(--muted);
+      min-height: 20px;
+      word-break: break-all;
+      text-align: right;
+      margin-bottom: 8px;
+    }
+    .calc-result{
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text);
+      word-break: break-all;
+      text-align: right;
+    }
+
+    /* 隱藏元素 */
+    .hidden{
+      display: none !important;
+    }
 
     /* responsive tweaks */
     @media (max-width:420px){
@@ -192,6 +286,7 @@
       .brand{ width:44px;height:44px;}
       .value{ font-size:20px; }
       .btn{ border-radius:10px; }
+      .calc-result{ font-size: 28px; }
     }
 
     /* modal */
@@ -209,55 +304,107 @@
       text-align:center; margin:8px 0 12px;
     }
     .save-btn{ padding:10px 18px; border-radius:10px; border:none; background: linear-gradient(90deg,var(--accent-2), var(--accent-deep)); color:white; font-weight:700; cursor:pointer; }
+
+    /* 模式切換提示 */
+    .mode-hint{
+      position: absolute;
+      top: 70px;
+      left: 22px;
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body>
   <div class="calculator-frame">
     <div class="header">
-      <div class="brand">₫ ↔</div>
+      <div class="brand" id="mode-toggle" onclick="toggleMode()" title="點擊切換模式">
+        <span class="brand-icon" id="brand-icon">₫ ↔</span>
+      </div>
       <div>
-        <div class="title">越南盾換算機</div>
-        <div class="desc">思瑀小戴旅行團</div>
+        <div class="title" id="app-title">越南盾換算機</div>
+        <div class="desc" id="app-desc">思瑀小戴旅行團</div>
       </div>
     </div>
 
-    <button class="settings-btn" onclick="openSettings()" aria-label="設定匯率">
+    <div class="mode-hint" id="mode-hint">點擊圖示切換模式</div>
+
+    <!-- 越南盾換算機的設定按鈕 -->
+    <button class="settings-btn" id="settings-btn" onclick="openSettings()" aria-label="設定匯率">
       <div class="icon"><i class="fas fa-cog"></i></div>
       <div style="font-size:13px; color:var(--accent-deep); font-weight:700;">設定</div>
     </button>
 
-    <div class="screen-container">
-      <div class="display-box" id="vnd-display">
-        <div class="display-left">
-          <div class="label">₫ 越南盾</div>
+    <!-- ========== 越南盾換算機模式 ========== -->
+    <div id="vnd-mode">
+      <div class="screen-container">
+        <div class="display-box" id="vnd-display">
+          <div class="display-left">
+            <div class="label">₫ 越南盾</div>
+          </div>
+          <div class="value" id="vnd-value">0</div>
         </div>
-        <div class="value" id="vnd-value">0</div>
+
+        <div class="display-box" id="twd-display">
+          <div class="display-left">
+            <div class="label">NT$ 台幣</div>
+          </div>
+          <div class="value" id="twd-value">0</div>
+        </div>
       </div>
 
-      <div class="display-box" id="twd-display">
-        <div class="display-left">
-          <div class="label">NT$ 台幣</div>
-        </div>
-        <div class="value" id="twd-value">0</div>
+      <div class="keypad" role="group" aria-label="數字鍵盤">
+        <button class="btn btn-num" onclick="pressNum(7)">7</button>
+        <button class="btn btn-num" onclick="pressNum(8)">8</button>
+        <button class="btn btn-num" onclick="pressNum(9)">9</button>
+
+        <button class="btn btn-num" onclick="pressNum(4)">4</button>
+        <button class="btn btn-num" onclick="pressNum(5)">5</button>
+        <button class="btn btn-num" onclick="pressNum(6)">6</button>
+
+        <button class="btn btn-num" onclick="pressNum(1)">1</button>
+        <button class="btn btn-num" onclick="pressNum(2)">2</button>
+        <button class="btn btn-num" onclick="pressNum(3)">3</button>
+
+        <button class="btn btn-num" onclick="pressNum(0)">0</button>
+        <button class="btn btn-ce" onclick="clearAll()">CE</button>
+        <button class="btn btn-back" onclick="backspace()"><i class="fas fa-backspace"></i></button>
       </div>
     </div>
 
-    <div class="keypad" role="group" aria-label="數字鍵盤">
-      <button class="btn btn-num" onclick="pressNum(7)">7</button>
-      <button class="btn btn-num" onclick="pressNum(8)">8</button>
-      <button class="btn btn-num" onclick="pressNum(9)">9</button>
+    <!-- ========== 普通計算機模式 ========== -->
+    <div id="calc-mode" class="hidden">
+      <div class="calc-display">
+        <div class="calc-expression" id="calc-expression"></div>
+        <div class="calc-result" id="calc-result">0</div>
+      </div>
 
-      <button class="btn btn-num" onclick="pressNum(4)">4</button>
-      <button class="btn btn-num" onclick="pressNum(5)">5</button>
-      <button class="btn btn-num" onclick="pressNum(6)">6</button>
+      <div class="keypad calc-mode" role="group" aria-label="計算機鍵盤">
+        <button class="btn btn-ce" onclick="calcClear()">C</button>
+        <button class="btn btn-back" onclick="calcBackspace()"><i class="fas fa-backspace"></i></button>
+        <button class="btn btn-op" onclick="calcOperator('%')">%</button>
+        <button class="btn btn-op" onclick="calcOperator('/')">÷</button>
 
-      <button class="btn btn-num" onclick="pressNum(1)">1</button>
-      <button class="btn btn-num" onclick="pressNum(2)">2</button>
-      <button class="btn btn-num" onclick="pressNum(3)">3</button>
+        <button class="btn btn-num" onclick="calcNum('7')">7</button>
+        <button class="btn btn-num" onclick="calcNum('8')">8</button>
+        <button class="btn btn-num" onclick="calcNum('9')">9</button>
+        <button class="btn btn-op" onclick="calcOperator('*')">×</button>
 
-      <button class="btn btn-num" onclick="pressNum(0)">0</button>
-      <button class="btn btn-ce" onclick="clearAll()">CE</button>
-      <button class="btn btn-back" onclick="backspace()"><i class="fas fa-backspace"></i></button>
+        <button class="btn btn-num" onclick="calcNum('4')">4</button>
+        <button class="btn btn-num" onclick="calcNum('5')">5</button>
+        <button class="btn btn-num" onclick="calcNum('6')">6</button>
+        <button class="btn btn-op" onclick="calcOperator('-')">−</button>
+
+        <button class="btn btn-num" onclick="calcNum('1')">1</button>
+        <button class="btn btn-num" onclick="calcNum('2')">2</button>
+        <button class="btn btn-num" onclick="calcNum('3')">3</button>
+        <button class="btn btn-op" onclick="calcOperator('+')">+</button>
+
+        <button class="btn btn-num btn-wide" onclick="calcNum('0')">0</button>
+        <button class="btn btn-num" onclick="calcDecimal()">.</button>
+        <button class="btn btn-eq" onclick="calcEquals()">=</button>
+      </div>
     </div>
   </div>
 
@@ -274,7 +421,34 @@
   </div>
 
   <script>
-    // 未改動核心邏輯，僅保留原本行為
+    // ========== 模式切換 ==========
+    let currentMode = 'vnd'; // 'vnd' 或 'calc'
+
+    function toggleMode() {
+      if (currentMode === 'vnd') {
+        currentMode = 'calc';
+        document.getElementById('vnd-mode').classList.add('hidden');
+        document.getElementById('calc-mode').classList.remove('hidden');
+        document.getElementById('settings-btn').classList.add('hidden');
+        document.getElementById('mode-toggle').classList.add('calc-mode');
+        document.getElementById('brand-icon').innerHTML = '<i class="fas fa-calculator"></i>';
+        document.getElementById('app-title').innerText = '計算機';
+        document.getElementById('app-desc').innerText = '點擊圖示切換模式';
+        document.getElementById('mode-hint').classList.add('hidden');
+      } else {
+        currentMode = 'vnd';
+        document.getElementById('vnd-mode').classList.remove('hidden');
+        document.getElementById('calc-mode').classList.add('hidden');
+        document.getElementById('settings-btn').classList.remove('hidden');
+        document.getElementById('mode-toggle').classList.remove('calc-mode');
+        document.getElementById('brand-icon').innerHTML = '₫ ↔';
+        document.getElementById('app-title').innerText = '越南盾換算機';
+        document.getElementById('app-desc').innerText = '思瑀小戴旅行團';
+        document.getElementById('mode-hint').classList.remove('hidden');
+      }
+    }
+
+    // ========== 越南盾換算機邏輯 ==========
     let rawInput = "";
     let exchangeRate = 720;
 
@@ -349,8 +523,178 @@
         modal.setAttribute('aria-hidden','true');
       }
     }
+
+    // ========== 普通計算機邏輯 ==========
+    let calcExpression = '';
+    let calcCurrentNum = '0';
+    let calcLastOperator = '';
+    let calcShouldResetNum = false;
+    let calcJustCalculated = false;
+
+    function calcNum(num) {
+      if (calcJustCalculated) {
+        calcExpression = '';
+        calcCurrentNum = num;
+        calcJustCalculated = false;
+      } else if (calcShouldResetNum) {
+        calcCurrentNum = num;
+        calcShouldResetNum = false;
+      } else {
+        if (calcCurrentNum === '0' && num !== '0') {
+          calcCurrentNum = num;
+        } else if (calcCurrentNum === '0' && num === '0') {
+          // 不做任何事
+        } else if (calcCurrentNum.replace('-', '').replace('.', '').length < 12) {
+          calcCurrentNum += num;
+        }
+      }
+      updateCalcDisplay();
+    }
+
+    function calcDecimal() {
+      if (calcJustCalculated) {
+        calcExpression = '';
+        calcCurrentNum = '0.';
+        calcJustCalculated = false;
+      } else if (calcShouldResetNum) {
+        calcCurrentNum = '0.';
+        calcShouldResetNum = false;
+      } else if (!calcCurrentNum.includes('.')) {
+        calcCurrentNum += '.';
+      }
+      updateCalcDisplay();
+    }
+
+    function calcOperator(op) {
+      calcJustCalculated = false;
+      
+      if (calcExpression && !calcShouldResetNum) {
+        // 先計算之前的結果
+        calcEquals(true);
+      }
+      
+      calcExpression = calcCurrentNum + ' ' + getDisplayOperator(op) + ' ';
+      calcLastOperator = op;
+      calcShouldResetNum = true;
+      updateCalcDisplay();
+    }
+
+    function getDisplayOperator(op) {
+      switch(op) {
+        case '*': return '×';
+        case '/': return '÷';
+        case '-': return '−';
+        case '+': return '+';
+        case '%': return '%';
+        default: return op;
+      }
+    }
+
+    function calcEquals(isChained = false) {
+      if (!calcExpression || !calcLastOperator) {
+        if (!isChained) calcJustCalculated = true;
+        return;
+      }
+      
+      const parts = calcExpression.trim().split(' ');
+      const num1 = parseFloat(parts[0]);
+      const num2 = parseFloat(calcCurrentNum);
+      let result;
+
+      switch(calcLastOperator) {
+        case '+':
+          result = num1 + num2;
+          break;
+        case '-':
+          result = num1 - num2;
+          break;
+        case '*':
+          result = num1 * num2;
+          break;
+        case '/':
+          if (num2 === 0) {
+            result = 'Error';
+          } else {
+            result = num1 / num2;
+          }
+          break;
+        case '%':
+          result = num1 % num2;
+          break;
+        default:
+          result = num2;
+      }
+
+      if (result !== 'Error') {
+        // 處理浮點數精度問題
+        result = parseFloat(result.toPrecision(12));
+      }
+
+      if (!isChained) {
+        document.getElementById('calc-expression').innerText = 
+          calcExpression + calcCurrentNum + ' =';
+      }
+      
+      calcCurrentNum = result.toString();
+      calcExpression = '';
+      calcLastOperator = '';
+      calcShouldResetNum = true;
+      
+      if (!isChained) {
+        calcJustCalculated = true;
+      }
+      
+      updateCalcDisplay();
+    }
+
+    function calcClear() {
+      calcExpression = '';
+      calcCurrentNum = '0';
+      calcLastOperator = '';
+      calcShouldResetNum = false;
+      calcJustCalculated = false;
+      updateCalcDisplay();
+    }
+
+    function calcBackspace() {
+      if (calcJustCalculated) {
+        return;
+      }
+      if (calcCurrentNum.length > 1) {
+        calcCurrentNum = calcCurrentNum.slice(0, -1);
+        if (calcCurrentNum === '-') {
+          calcCurrentNum = '0';
+        }
+      } else {
+        calcCurrentNum = '0';
+      }
+      updateCalcDisplay();
+    }
+
+    function updateCalcDisplay() {
+      const expressionEl = document.getElementById('calc-expression');
+      const resultEl = document.getElementById('calc-result');
+      
+      if (!calcJustCalculated) {
+        expressionEl.innerText = calcExpression;
+      }
+      
+      // 格式化數字顯示
+      let displayNum = calcCurrentNum;
+      if (displayNum !== 'Error' && !isNaN(parseFloat(displayNum))) {
+        const num = parseFloat(displayNum);
+        if (displayNum.includes('.') && displayNum.endsWith('.')) {
+          displayNum = num.toLocaleString() + '.';
+        } else if (displayNum.includes('.')) {
+          const parts = displayNum.split('.');
+          displayNum = parseFloat(parts[0]).toLocaleString() + '.' + parts[1];
+        } else {
+          displayNum = num.toLocaleString();
+        }
+      }
+      
+      resultEl.innerText = displayNum;
+    }
   </script>
 </body>
 </html>
-
-
